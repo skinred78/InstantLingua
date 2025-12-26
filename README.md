@@ -23,6 +23,7 @@ With built-in support for **OpenAI, Claude, Grok, Gemini, and Ollama (local)**, 
   - Text-to-speech for original and translation
   - Quick copy buttons for each section
   - Click outside or press `Esc` to close, `Return` to confirm, `Cmd+C` to copy translation
+- **Auto-Dialog Threshold** – Automatically switch to Dialog Window when output exceeds the threshold (default: 200 chars). This ensures long responses are always readable with proper text wrapping. Set to 0 to disable.
 
 ## Tasks Overview
 
@@ -105,8 +106,9 @@ InstantLingua enhances your PopClip experience with fast, AI-driven language too
    - For translation: select target language and enable bilingual comparison if desired
    - For rewrite: choose your preferred rewrite style
    - For custom prompt: enter your custom AI instruction
-6. Choose display mode: Display Only, Display and Copy, or Paste to Cursor
-7. Adjust temperature settings if needed
+6. Choose display mode: Display Only, Display and Copy, Paste to Cursor, or Dialog Window
+7. Adjust Auto-Dialog Threshold if needed (default: 200 characters, set to 0 to disable)
+8. Adjust temperature settings if needed
 
 ### Ollama Setup
 
@@ -128,6 +130,21 @@ InstantLingua takes your privacy seriously:
 - **Transparent Code**: The extension's source code is open and available for review.
 
 We respect your privacy and are committed to maintaining the security and confidentiality of your data.
+
+## Documentation
+
+For detailed technical documentation, see the [`docs/`](docs/) directory:
+
+| Document | Description |
+|----------|-------------|
+| [Project Overview & PDR](docs/project-overview-pdr.md) | Product requirements, features, and specifications |
+| [Codebase Summary](docs/codebase-summary.md) | File structure, component relationships, tech stack |
+| [Code Standards](docs/code-standards.md) | TypeScript/Swift guidelines, naming conventions |
+| [System Architecture](docs/system-architecture.md) | Architecture diagrams, data flows, API patterns |
+
+## Contributing
+
+Contributions are welcome! Please read the [Code Standards](docs/code-standards.md) before submitting PRs.
 
 ## License
 

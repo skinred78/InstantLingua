@@ -178,6 +178,13 @@ export const options = [
     type: "boolean",
     defaultValue: false
   },
+  {
+    identifier: "longTextThreshold",
+    label: "Auto-Dialog Threshold",
+    type: "string",
+    defaultValue: "200",
+    description: "Switch to Dialog Window for text longer than this (0 = never)"
+  },
   // Model Settings
   {
     identifier: "model",
@@ -583,24 +590,36 @@ Important rules:
         processedText = `${text}\n---\n${processedText}`;
       }
 
+      // Parse threshold from options (0 = disabled)
+      const parsedThreshold = parseInt(options.longTextThreshold || "200", 10);
+      const threshold = isNaN(parsedThreshold) || parsedThreshold < 0 ? 0 : parsedThreshold;
+
+      // Never auto-switch paste mode - user explicitly wants text inserted at cursor
+      const canForceDialog = options.displayMode !== "paste";
+      const shouldForceDialog = canForceDialog && threshold > 0 && processedText.length > threshold;
+
+      // Determine effective display mode
+      const effectiveDisplayMode = shouldForceDialog ? "dialog" : options.displayMode;
+
       // Handle different display modes
-      switch (options.displayMode) {
+      switch (effectiveDisplayMode) {
         case "dialog":
-          // Try to pass text via URL parameter to avoid writing to clipboard
-          // Use URL-safe base64 encoding for text with special characters
+          // URL-safe base64 encoding for dialog
           const textBytes = unescape(encodeURIComponent(processedText));
           let base64 = btoa(textBytes);
-          // Convert to URL-safe base64 (no padding, use - and _ instead of + and /)
           const urlSafeBase64 = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
           const encodedUrl = `instantlingua://show?b64=${urlSafeBase64}`;
 
-          // Check URL length - macOS handles up to ~2000 chars reliably
           if (encodedUrl.length <= 2000) {
             popclip.openUrl(encodedUrl);
           } else {
-            // Fallback to clipboard for very long texts
             popclip.copyText(processedText);
             popclip.openUrl("instantlingua://show");
+          }
+
+          // Preserve original mode side effects when auto-switching
+          if (shouldForceDialog && options.displayMode === "displayAndCopy") {
+            popclip.copyText(processedText);
           }
           break;
         case "paste":

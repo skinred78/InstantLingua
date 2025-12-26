@@ -147,6 +147,13 @@ export const options = [
     defaultValue: false
   },
   {
+    identifier: "longTextThreshold",
+    label: "Auto-Dialog Threshold",
+    type: "string",
+    defaultValue: "200",
+    description: "Switch to Dialog Window for text longer than this (0 = never)"
+  },
+  {
     identifier: "provider",
     label: "Provider",
     type: "multiple",
@@ -462,8 +469,19 @@ Important rules:
         processedText = `${text}\n---\n${processedText}`;
       }
 
+      // Parse threshold from options (0 = disabled)
+      const parsedThreshold = parseInt(options.longTextThreshold || "200", 10);
+      const threshold = isNaN(parsedThreshold) || parsedThreshold < 0 ? 0 : parsedThreshold;
+
+      // Never auto-switch paste mode - user explicitly wants text inserted at cursor
+      const canForceDialog = options.displayMode !== "paste";
+      const shouldForceDialog = canForceDialog && threshold > 0 && processedText.length > threshold;
+
+      // Determine effective display mode
+      const effectiveDisplayMode = shouldForceDialog ? "dialog" : options.displayMode;
+
       // Handle different display modes
-      switch (options.displayMode) {
+      switch (effectiveDisplayMode) {
         case "dialog":
           const textBytes = unescape(encodeURIComponent(processedText));
           let base64 = btoa(textBytes);
@@ -475,6 +493,11 @@ Important rules:
           } else {
             popclip.copyText(processedText);
             popclip.openUrl("instantlingua://show");
+          }
+
+          // Preserve original mode side effects when auto-switching
+          if (shouldForceDialog && options.displayMode === "displayAndCopy") {
+            popclip.copyText(processedText);
           }
           break;
         case "paste":
